@@ -4,7 +4,7 @@
 
 ---
 
-## 🔍 Motivation
+## Motivation
 
 Modern large language models (LLMs) like GPT-4o demonstrate powerful reasoning abilities, especially in few-shot or in-context learning (ICL) settings. However, they remain vulnerable to **verbatim memorization** of training data—posing **privacy risks** and casting doubt on whether their outputs reflect true reasoning.
 
@@ -23,10 +23,10 @@ We introduce **Perturbation-Aware Prompting (PAP)**—a novel training-time inte
 
 ## Key Contributions
 
-- ⚙️ **Perturbation Framework**: Use GPT-4o to generate lexical, typographical, and structural perturbations of GSM8K answers.
-- 🧠 **Automatic Filtering with g-eval**: Retain only semantically valid perturbations using DeepEval's rule-based verification.
-- 🧪 **Memorization Assessment**: Apply ACR to detect memorization on training samples.
-- 📈 **Generalization Benchmark**: Evaluate models on the GSM8K test set to ensure no accuracy drop.
+- **Perturbation Framework**: Use GPT-4o to generate lexical, typographical, and structural perturbations of GSM8K answers.
+- **Automatic Filtering with g-eval**: Retain only semantically valid perturbations using DeepEval's rule-based verification.
+- **Memorization Assessment**: Apply ACR to detect memorization on training samples.
+- **Generalization Benchmark**: Evaluate models on the GSM8K test set to ensure no accuracy drop.
 
 ---
 
@@ -64,7 +64,7 @@ We introduce **Perturbation-Aware Prompting (PAP)**—a novel training-time inte
 ## Repository Structure
 
 ```
-📦 project-root
+ project-root
 ├── datasets/
 │   ├── g-eval_filtered_perturbed_data/      # g-eval filtered data which contains perturbed + original dataset mix
 │   └── generalization_accuracy_data/        # Datasets contains accuracy labels dataset.
