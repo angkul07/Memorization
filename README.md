@@ -41,7 +41,7 @@ We introduce **Perturbation-Aware Prompting (PAP)**—a novel training-time inte
 
 ### 2. Perturbation Generation
 - Prompts to GPT-4o create multiple perturbed answers per GSM8K sample.
-- Stored and versioned under [`perturbation_generation_code/`](./perturbation_generation_code).
+- Stored and versioned under [`perturbation_generation_code/`](./datasets/perturbation_generation_code).
 
 ### 3. Filtering with g-eval
 - Use DeepEval’s `g-eval` to verify:
@@ -56,6 +56,8 @@ We introduce **Perturbation-Aware Prompting (PAP)**—a novel training-time inte
 - Evaluate using:
   - `ACR` (memorization)
   - GSM8K test accuracy (generalization)
+ 
+> Every trained model is available [here](https://huggingface.co/sohamwasmatkar)
 
 ---
 
