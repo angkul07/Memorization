@@ -21,11 +21,11 @@ def calculate_perplexity_on_model_outputs():
     """
     # Model and dataset mappings
     model_dataset_pairs = [
-        ("sohamwasmatkar/lora_model_0", "gsm8k_0.csv"),
-        ("sohamwasmatkar/lora_model_25", "filtered_gsmk8_25.csv"),
-        ("sohamwasmatkar/lora_model_50", "filtered_gsmk8_50.csv"),
-        ("sohamwasmatkar/lora_model_75", "filtered_gsmk8_75.csv"),
-        ("sohamwasmatkar/lora_model_100", "filtered_gsmk8_100.csv")
+        ("sohamwasmatkar/lora_model_0", "datasets/g-eval_filtered_perturbed_data/gsm8k_0.csv"),
+        ("sohamwasmatkar/lora_model_25", "datasets/g-eval_filtered_perturbed_data/filtered_gsmk8_25.csv"),
+        ("sohamwasmatkar/lora_model_50", "datasets/g-eval_filtered_perturbed_data/filtered_gsmk8_50.csv"),
+        ("sohamwasmatkar/lora_model_75", "datasets/g-eval_filtered_perturbed_data/filtered_gsmk8_75.csv"),
+        ("sohamwasmatkar/lora_model_100", "datasets/g-eval_filtered_perturbed_data/filtered_gsmk8_100.csv")
     ]
 
     # Create a dictionary to store scores by model

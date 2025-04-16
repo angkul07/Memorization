@@ -291,11 +291,6 @@ def main():
             )
         mem_dataset = raw_dataset.filter(lambda example: example["label"] == 1)
         non_dataset = raw_dataset.filter(lambda example: example["label"] == 0)
-        # if not args.unaligned_model:
-        #     mem_format = partial(instruct_format, ismember=True, tokenizer=tokenizer)
-        #     non_format = partial(instruct_format, ismember=False, tokenizer=tokenizer)
-        #     mem_dataset = mem_dataset.map(mem_format, remove_columns=["label"], load_from_cache_file=False)
-        #     non_dataset = non_dataset.map(non_format, remove_columns=["label"], load_from_cache_file=False)
         min_length = min(len(mem_dataset), len(non_dataset))
         mem_dataset = mem_dataset.shuffle(seed=args.seed).select(range(min_length))
         non_dataset = non_dataset.shuffle(seed=args.seed).select(range(min_length))
@@ -310,8 +305,6 @@ def main():
             non_dataset["train"] = non_dataset["train"].map(partial(instruct_format, ismember=False, istrain=True, tokenizer=tokenizer), load_from_cache_file=False)
             mem_dataset["test"] = mem_dataset["test"].map(partial(instruct_format, ismember=True, istrain=False, tokenizer=tokenizer), load_from_cache_file=False)
             non_dataset["test"] = non_dataset["test"].map(partial(instruct_format, ismember=False, istrain=False, tokenizer=tokenizer), load_from_cache_file=False)
-            # mem_dataset["test"] = mem_dataset["test"].map(partial(remove_after_assistant, key="Assistant: "), load_from_cache_file=False)
-            # non_dataset["test"] = non_dataset["test"].map(partial(remove_after_assistant, key="Assistant: "), load_from_cache_file=False)
         mem_dataset.save_to_disk(os.path.join(prepared_dataset_path, "mem"))
         non_dataset.save_to_disk(os.path.join(prepared_dataset_path, "non"))
     accelerator.wait_for_everyone()
@@ -483,12 +476,8 @@ def main():
                 assert len(pos_batch["input_ids"]) == len(neg_batch["input_ids"])
                 batch_size = len(pos_batch["input_ids"])
                 if not args.unaligned_model:
-                #     pos_ass_idx = index_output(pos_batch["input_ids"], special_tokens[":"]) + 1
-                #     neg_ass_idx = index_output(neg_batch["input_ids"], special_tokens[":"]) + 1
                     pos_out_idx = pos_batch["attention_mask"].sum(1) # The index of the first padding token
                     neg_out_idx = neg_batch["attention_mask"].sum(1) # The index of the first padding token
-                # if not torch.equal(pos_out_idx, pos_out_idx_) or not torch.equal(neg_out_idx, neg_out_idx_):
-                #     raise ValueError("Output index not equal.")
                 if not args.hf_peft:
                     pos_batch["input_ids"] = torch.cat([torch.full((len(pos_batch["input_ids"]), args.p_tokens), tokenizer.eos_token_id).to(pos_batch["input_ids"]), pos_batch["input_ids"]], dim=1)
                     neg_batch["input_ids"] = torch.cat([torch.full((len(pos_batch["input_ids"]), args.p_tokens), tokenizer.eos_token_id).to(neg_batch["input_ids"].device), neg_batch["input_ids"]], dim=1)
@@ -528,8 +517,6 @@ def main():
                     neg_no.extend(accelerator.gather_for_metrics(neg_loss_n).cpu().tolist())
                     pos_answers.extend(accelerator.gather_for_metrics(pos_shift_logits[range(batch_size), pos_out_idx, :].argmax(-1)).cpu().tolist()) # stuck here, gather not the same shape
                     neg_answers.extend(accelerator.gather_for_metrics(neg_shift_logits[range(batch_size), neg_out_idx, :].argmax(-1)).cpu().tolist())
-        # auc_score_y = roc_auc_score([0] * len(pos_yes) + [1] * len(neg_yes), pos_yes + neg_yes)
-        # auc_score_n = roc_auc_score([1] * len(pos_no) + [0] * len(neg_no), pos_no + neg_no)
         if args.unaligned_model:
             labels = [0] * len(pos_val_loss) + [1] * len(neg_val_loss)
             scores = pos_val_loss + neg_val_loss
@@ -560,10 +547,6 @@ def main():
         # Calculate F1 score
         f1 = f1_score(labels, predictions)
         logger.info(f"F1 Score: {f1}")
-        # pos_answers = tokenizer.batch_decode(pos_answers)
-        # neg_answers = tokenizer.batch_decode(neg_answers)
-        # logger.info(f"Pos: {Counter((pos_answers))}")
-        # logger.info(f"Neg: {Counter((neg_answers))}")
         accelerator.log(
             {
                 r"eval/AUC": auc_score,
@@ -595,14 +578,10 @@ def main():
                 assert len(pos_batch["input_ids"]) == len(neg_batch["input_ids"])
                 batch_size = len(pos_batch["input_ids"])
                 if not args.unaligned_model:
-                    # pos_ass_idx = index_output(pos_batch["input_ids"], special_tokens["ass_last"]) # The index of the last assistant generation token
-                    # neg_ass_idx = index_output(neg_batch["input_ids"], special_tokens["ass_last"]) # The index of the last assistant generation token
                     pos_out_idx = index_output(pos_batch["input_ids"], special_tokens["Yes"]) # The index of the answer token
                     neg_out_idx = index_output(neg_batch["input_ids"], special_tokens["No"]) # The index of the answer token
                     pos_ass_idx = pos_out_idx - 1
                     neg_ass_idx = neg_out_idx - 1
-                # if not torch.equal(pos_out_idx, pos_out_idx_) or not torch.equal(neg_out_idx, neg_out_idx_):
-                #     raise ValueError("Output index not equal.")
                 if not args.hf_peft:
                     pos_batch["input_ids"] = torch.cat([torch.full((len(pos_batch["input_ids"]), args.p_tokens), tokenizer.eos_token_id).to(pos_batch["input_ids"]), pos_batch["input_ids"]], dim=1)
                     neg_batch["input_ids"] = torch.cat([torch.full((len(pos_batch["input_ids"]), args.p_tokens), tokenizer.eos_token_id).to(neg_batch["input_ids"].device), neg_batch["input_ids"]], dim=1)
@@ -640,13 +619,10 @@ def main():
                     pos_loss_n = loss_fct(pos_shift_logits[range(batch_size), pos_out_idx, :], torch.tensor(special_tokens["No"]).repeat(batch_size).to("cuda"))
                     neg_loss_y = loss_fct(neg_shift_logits[range(batch_size), neg_out_idx, :], torch.tensor(special_tokens["Yes"]).repeat(batch_size).to("cuda"))
                     neg_loss_n = loss_fct(neg_shift_logits[range(batch_size), neg_out_idx, :], torch.tensor(special_tokens["No"]).repeat(batch_size).to("cuda"))
-                    # loss = (pos_loss.mean() + neg_loss.mean()) / 2
                     llm_loss = (pos_loss.mean() + neg_loss.mean()) / 2
                     clf_loss = F.cross_entropy(-torch.cat([torch.stack([pos_loss_n, pos_loss_y], dim=1), torch.stack([neg_loss_n, neg_loss_y], dim=1)]), 
                                             torch.cat([torch.ones(batch_size).long(), torch.zeros(batch_size).long()]).to(accelerator.device))
                     err_loss = -(torch.log(1 - torch.exp(-pos_loss_n)) + torch.log(1 - torch.exp(-neg_loss_y))).mean()
-                    # loss = (pos_outputs.loss + neg_outputs.loss) / 2
-                    # loss = (pos_loss_y + neg_loss_n - pos_loss_n - neg_loss_y) / 2
                     loss = args.llm_loss_weight * llm_loss + args.clf_loss_weight * clf_loss + args.err_loss_weight * err_loss
 
                 accelerator.backward(loss)

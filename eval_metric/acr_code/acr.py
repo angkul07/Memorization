@@ -287,7 +287,7 @@ def minimize_prompt(model, tokenizer, input_str, target_str, system_prompt, chat
 
 def main():
     # Configuration
-    csv_path = '/teamspace/studios/this_studio/filtered_gsmk8_25.csv'
+    csv_path = '<filtered_gsmk8_.csv file path>'
     model_name = "sohamwasmatkar/lora_model_25"
     num_samples = 1
     
@@ -401,7 +401,7 @@ def main():
             
     # Save results
     results_df = pd.DataFrame(results_list)
-    output_path = '/teamspace/studios/this_studio/acr_results.csv'
+    output_path = 'acr_results.csv'
     results_df.to_csv(output_path, index=False)
     logger.info(f"Results saved to {output_path}")
     logger.info(f"Results summary:\n{results_df}")
